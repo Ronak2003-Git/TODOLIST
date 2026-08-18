@@ -10,8 +10,10 @@ export const tokenStore = {
   clear() { localStorage.removeItem(TOKEN_KEY); },
 };
 
+const defaultApiBaseUrl = import.meta.env.PROD ? '/api' : 'http://127.0.0.1:8018/api';
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8018/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || defaultApiBaseUrl,
   headers: { Accept: 'application/json' },
 });
 

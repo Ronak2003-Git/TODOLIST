@@ -50,3 +50,14 @@ backend/   Django REST API
 ```
 
 The backend ships with a seeded local administrator for development only. Change these credentials before any deployment.
+
+## Vercel deployment
+
+The Vercel deployment serves the React app and Django API from one domain. In production the frontend calls `/api`, so browser requests do not require a cross-origin API URL.
+
+1. Create a Neon PostgreSQL database through the Vercel Marketplace and copy its `DATABASE_URL` into the Vercel project environment variables.
+2. Add a strong `DJANGO_SECRET_KEY`, set `DJANGO_DEBUG=false`, and set `DJANGO_ALLOWED_HOSTS=.vercel.app`.
+3. Run Django migrations against that PostgreSQL database before promoting the deployment.
+4. Configure Vercel Blob storage before using profile-image or file-attachment uploads; Vercel function storage is not persistent.
+
+The required variable names are listed in `.env.example`. Never commit their production values.

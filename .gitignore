@@ -15,9 +15,13 @@ frontend/dist/
 .env
 .env.*
 !.env.example
+.vercel/
 
 # Editor and operating system files
 .vscode/
 .idea/
 Thumbs.db
 Desktop.ini
+
+.vercel
+.env*
