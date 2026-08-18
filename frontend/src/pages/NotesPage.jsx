@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { FiDownload, FiEdit2, FiExternalLink, FiFileText, FiPlus, FiSearch, FiTrash2, FiUpload, FiX } from 'react-icons/fi';
+import { FiDownload, FiEdit2, FiExternalLink, FiFileText, FiMaximize2, FiMinimize2, FiPlus, FiSearch, FiTrash2, FiUpload, FiX } from 'react-icons/fi';
 import EmptyState from '../components/EmptyState';
 import NotebookEditor from '../components/NotebookEditor';
 import NoteContent, { noteSummary } from '../components/NoteContent';
@@ -30,6 +30,7 @@ function NotesPage() {
   const [isComposerOpen, setIsComposerOpen] = useState(false);
   const [editingNote, setEditingNote] = useState(null);
   const [viewingNote, setViewingNote] = useState(null);
+  const [isReaderFullscreen, setIsReaderFullscreen] = useState(false);
   const [form, setForm] = useState(blankNote);
   const [formError, setFormError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -64,7 +65,15 @@ function NotesPage() {
     setIsComposerOpen(true);
   };
 
-  const openReader = (note) => setViewingNote(note);
+  const openReader = (note) => {
+    setViewingNote(note);
+    setIsReaderFullscreen(false);
+  };
+
+  const closeReader = () => {
+    setViewingNote(null);
+    setIsReaderFullscreen(false);
+  };
 
   const saveNote = async (event) => {
     event.preventDefault();
@@ -133,7 +142,7 @@ function NotesPage() {
       {isComposerOpen && <div className="modal-layer" role="presentation"><section className="note-modal" role="dialog" aria-modal="true" aria-labelledby="note-modal-title"><button className="modal-close" type="button" onClick={closeComposer} aria-label="Close"><FiX /></button><p className="eyebrow eyebrow--violet">{editingNote ? 'UPDATE NOTEBOOK' : 'NEW NOTEBOOK'}</p><h2 id="note-modal-title">{editingNote ? 'Edit your note' : 'Write a study note'}</h2><p className="note-modal__intro">Organize your ideas with headings, lists, and key points. Add a PDF or DOCX only when you need an extra resource.</p>{formError && <p className="form-alert">{formError}</p>}
         <form onSubmit={saveNote} noValidate><label className="form-field"><span>Heading <b>*</b></span><input value={form.heading} onChange={(event) => setForm({ ...form, heading: event.target.value })} placeholder="e.g. Unit 3 revision notes" autoFocus /></label><div className="form-grid form-grid--two"><label className="form-field"><span>Subject</span><select value={form.subjectId} onChange={(event) => setForm({ ...form, subjectId: event.target.value })}><option value="">General note</option>{subjects.map((subject) => <option key={subject.id} value={subject.id}>{subject.name}</option>)}</select></label><label className="form-field"><span>Semester</span><select value={form.semester} onChange={(event) => setForm({ ...form, semester: event.target.value })}>{semesters.map((semester) => <option key={semester} value={semester}>Semester {semester}</option>)}</select></label></div><NotebookEditor value={form.content} onChange={(content) => setForm({ ...form, content })} /><label className="attachment-input note-file-input"><FiUpload /><span><strong>{form.attachmentFile?.name || form.attachmentName || 'Attach a PDF or DOCX (optional)'}</strong><small>PDF or DOCX · up to 10 MB</small></span><input type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={(event) => { const attachmentFile = event.target.files?.[0] || null; setForm({ ...form, attachmentFile, attachmentName: attachmentFile?.name || form.attachmentName }); }} /></label><div className="form-actions"><button className="button button--ghost" type="button" onClick={closeComposer} disabled={isSaving}>Cancel</button><button className="button button--primary" type="submit" disabled={isSaving}>{isSaving ? 'Saving…' : editingNote ? 'Save changes' : 'Save note'}</button></div></form>
       </section></div>}
-      {viewingNote && <div className="modal-layer" role="presentation"><article className="note-reader" role="dialog" aria-modal="true" aria-labelledby="note-reader-title"><button className="modal-close" type="button" onClick={() => setViewingNote(null)} aria-label="Close"><FiX /></button><p className="eyebrow eyebrow--violet">SEMESTER {viewingNote.semester} · {viewingNote.subjectName}</p><h2 id="note-reader-title">{viewingNote.heading}</h2><small>Updated {formatUpdatedAt(viewingNote.updatedAt)}</small><NoteContent content={viewingNote.content} className="note-reader__content" />{viewingNote.attachmentName && <button className="note-reader__download" type="button" onClick={() => handleDownload(viewingNote)} disabled={isDownloading === viewingNote.id}><FiDownload /> {isDownloading === viewingNote.id ? 'Preparing download…' : `Download ${viewingNote.attachmentName}`}</button>}</article></div>}
+      {viewingNote && <div className={`modal-layer${isReaderFullscreen ? ' modal-layer--reader-fullscreen' : ''}`} role="presentation"><article className={`note-reader${isReaderFullscreen ? ' note-reader--fullscreen' : ''}`} role="dialog" aria-modal="true" aria-labelledby="note-reader-title"><div className="note-reader__controls"><button className="note-reader__fullscreen" type="button" onClick={() => setIsReaderFullscreen((isFullscreen) => !isFullscreen)} aria-label={isReaderFullscreen ? 'Exit full screen note view' : 'Open full screen note view'} title={isReaderFullscreen ? 'Exit full screen' : 'View full screen'}>{isReaderFullscreen ? <FiMinimize2 /> : <FiMaximize2 />}</button><button className="modal-close" type="button" onClick={closeReader} aria-label="Close"><FiX /></button></div><p className="eyebrow eyebrow--violet">SEMESTER {viewingNote.semester} · {viewingNote.subjectName}</p><h2 id="note-reader-title">{viewingNote.heading}</h2><small>Updated {formatUpdatedAt(viewingNote.updatedAt)}</small><NoteContent content={viewingNote.content} className="note-reader__content" />{viewingNote.attachmentName && <button className="note-reader__download" type="button" onClick={() => handleDownload(viewingNote)} disabled={isDownloading === viewingNote.id}><FiDownload /> {isDownloading === viewingNote.id ? 'Preparing download…' : `Download ${viewingNote.attachmentName}`}</button>}</article></div>}
     </section>
   );
 }
